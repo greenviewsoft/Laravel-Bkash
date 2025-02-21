@@ -16,7 +16,6 @@ A simple and efficient bKash Payment Gateway integration package for Laravel 10 
 ```bash
 composer require tipusultan/laravel-bkash
 ```
-
 ### 2. Publish Package Files
 
 ```bash
@@ -49,6 +48,21 @@ BKASH_PASSWORD='your_password'
 BKASH_APP_KEY='your_app_key'
 BKASH_APP_SECRET='your_app_secret'
 ```
+
+
+
+4. Add Routes
+Add these routes to your routes/web.php file:
+
+Route::middleware(['web', 'auth'])->group(function () {
+    Route::prefix('bkash')->group(function () {
+        Route::get('/', [\App\Http\Controllers\BkashController::class, 'payment'])->name('url-pay');
+        Route::post('/create', [\App\Http\Controllers\BkashController::class, 'createPayment'])->name('url-create');
+        Route::get('/callback', [\App\Http\Controllers\BkashController::class, 'callback'])->name('url-callback');
+        Route::get('/refund', [\App\Http\Controllers\BkashController::class, 'getRefund'])->name('url-get-refund');
+        Route::post('/refund', [\App\Http\Controllers\BkashController::class, 'refundPayment'])->name('url-post-refund');
+    });
+});
 
 ## Package Structure
 
