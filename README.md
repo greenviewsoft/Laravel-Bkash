@@ -20,7 +20,22 @@ composer require tipusultan/laravel-bkash
 ### 2. Publish Package Files
 
 ```bash
-php artisan vendor:publish --tag=bkash
+php artisan vendor:publish --provider="Tipusultan\Bkash\BkashServiceProvider"
+```
+Or publish individual components
+
+```bash
+# Publish config file
+php artisan vendor:publish --tag=bkash-config
+
+# Publish views
+php artisan vendor:publish --tag=bkash-views
+
+# Publish controller
+php artisan vendor:publish --tag=bkash-controller
+
+# Publish service
+php artisan vendor:publish --tag=bkash-service
 ```
 
 ### 3. Configure Environment Variables
