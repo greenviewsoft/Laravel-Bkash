@@ -23,27 +23,32 @@ class BkashServiceProvider extends ServiceProvider
     protected function registerPublishables()
     {
         if ($this->app->runningInConsole()) {
-            // Config
-            $this->publishes([
-                __DIR__ . '/../config/bkash.php' => config_path('bkash.php')
-            ], 'bkash-config');
+            // ✅ Ensure config file exists before publishing
+            $configPath = __DIR__ . '/../config/bkash.php';
+            if (file_exists($configPath)) {
+                $this->publishes([
+                    $configPath => config_path('bkash.php')
+                ], 'bkash-config');
+            }
 
-            // Views
+            // ✅ Fix incorrect controller path
+            $this->publishes([
+                __DIR__ . '/../src/Controllers/BkashController.php' => app_path('Http/Controllers/BkashController.php')
+            ], 'bkash-controller');
+
+            // ✅ Publish Views
             $this->publishes([
                 __DIR__ . '/../resources/views' => resource_path('views/bkash')
             ], 'bkash-views');
-
-            // Controller
-            $this->publishes([
-                __DIR__ . '/Controllers/BkashController.php' => app_path('Http/Controllers/BkashController.php')
-            ], 'bkash-controller');
         }
     }
 
     public function register()
     {
-        // Merge config
-        $this->mergeConfigFrom(__DIR__ . '/../config/bkash.php', 'bkash');
+        $configPath = __DIR__ . '/../config/bkash.php';
+        if (file_exists($configPath)) {
+            $this->mergeConfigFrom($configPath, 'bkash');
+        }
     }
 
     protected function setupRoutes()
@@ -55,7 +60,7 @@ class BkashServiceProvider extends ServiceProvider
 
         $bkashRoutes = <<<'ROUTES'
 
-// bKash Payment Routes
+// bKash Payment Routes (Auto-Added)
 Route::middleware(['web', 'auth'])->group(function () {
     Route::prefix('bkash')->group(function () {
         Route::get('/', [\App\Http\Controllers\BkashController::class, 'payment'])->name('url-pay');
@@ -68,8 +73,9 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 ROUTES;
 
+        // ✅ Avoid duplicate route entries
         if (!str_contains(File::get($routesPath), 'bKash Payment Routes')) {
-            File::append($routesPath, $bkashRoutes);
+            File::append($routesPath, PHP_EOL . $bkashRoutes);
         }
     }
 }
