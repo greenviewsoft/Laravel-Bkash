@@ -23,19 +23,23 @@ class BkashServiceProvider extends ServiceProvider
     protected function registerPublishables()
     {
         if ($this->app->runningInConsole()) {
-            // Publish config
+
+            // ✅ Publish Config
             $this->publishes([
                 __DIR__ . '/../config/bkash.php' => config_path('bkash.php')
             ], 'bkash-config');
 
-            // Publish Controller
+            // ✅ Publish Controller
             $this->publishes([
                 __DIR__ . '/../src/Controllers/BkashController.php' => app_path('Http/Controllers/BkashController.php')
             ], 'bkash-controller');
 
-            // Publish Views
+            // ✅ Publish Views
             $this->publishes([
-                __DIR__ . '/../resources/views' => resource_path('views/bkash')
+                __DIR__ . '/../resources/views/pay.blade.php' => resource_path('views/bkash/pay.blade.php'),
+                __DIR__ . '/../resources/views/refund.blade.php' => resource_path('views/bkash/refund.blade.php'),
+                __DIR__ . '/../resources/views/success.blade.php' => resource_path('views/bkash/success.blade.php'),
+                __DIR__ . '/../resources/views/fail.blade.php' => resource_path('views/bkash/fail.blade.php'),
             ], 'bkash-views');
         }
     }
