@@ -30,10 +30,17 @@ class BkashServiceProvider extends ServiceProvider
                 __DIR__ . '/Controllers/BkashController.php' => app_path('Http/Controllers/BkashController.php')
             ], 'bkash-controller');
 
-            // Publish Views
+
+            // ✅ Fix View Publishing Path (Remove Extra `bkash/`)
             $this->publishes([
-                __DIR__ . '/resources/views' => resource_path('views/')
+                __DIR__ . '/resources/views' => resource_path('views')
             ], 'bkash-views');
+
+
+            // Publish Views old
+            // $this->publishes([
+            //     __DIR__ . '/resources/views' => resource_path('views/bkash')
+            // ], 'bkash-views');
 
             // Publish Service
             $this->publishes([
