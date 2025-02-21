@@ -13,8 +13,8 @@ class BkashServiceProvider extends ServiceProvider
         $this->registerPublishables();
 
         // Load views and migrations
-        $this->loadViewsFrom(__DIR__ . '/../resources/views', 'bkash');
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        $this->loadViewsFrom(__DIR__ . '/resources/views', 'bkash');
+        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
 
         // Setup routes
         $this->setupRoutes();
@@ -23,30 +23,31 @@ class BkashServiceProvider extends ServiceProvider
     protected function registerPublishables()
     {
         if ($this->app->runningInConsole()) {
-
-            // ✅ Publish Config
+            // Publish Config
             $this->publishes([
-                __DIR__ . '/../config/bkash.php' => config_path('bkash.php')
+                __DIR__ . '/config/bkash.php' => config_path('bkash.php')
             ], 'bkash-config');
 
-            // ✅ Publish Controller
+            // Publish Controller
             $this->publishes([
-                __DIR__ . '/../src/Controllers/BkashController.php' => app_path('Http/Controllers/BkashController.php')
+                __DIR__ . '/Controllers/BkashController.php' => app_path('Http/Controllers/BkashController.php')
             ], 'bkash-controller');
 
-            // ✅ Publish Views
+            // Publish Views
             $this->publishes([
-                __DIR__ . '/../resources/views/pay.blade.php' => resource_path('views/bkash/pay.blade.php'),
-                __DIR__ . '/../resources/views/refund.blade.php' => resource_path('views/bkash/refund.blade.php'),
-                __DIR__ . '/../resources/views/success.blade.php' => resource_path('views/bkash/success.blade.php'),
-                __DIR__ . '/../resources/views/fail.blade.php' => resource_path('views/bkash/fail.blade.php'),
+                __DIR__ . '/resources/views' => resource_path('views/bkash')
             ], 'bkash-views');
+
+            // Publish Service
+            $this->publishes([
+                __DIR__ . '/Services/BkashService.php' => app_path('Services/BkashService.php')
+            ], 'bkash-service');
         }
     }
 
     public function register()
     {
-        $configPath = __DIR__ . '/../config/bkash.php';
+        $configPath = __DIR__ . '/config/bkash.php';
         if (file_exists($configPath)) {
             $this->mergeConfigFrom($configPath, 'bkash');
         }
