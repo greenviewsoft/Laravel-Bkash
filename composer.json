@@ -1,0 +1,28 @@
+{
+    "name": "tipusultan/laravel-bkash",
+    "description": "A Laravel package for bKash payment integration",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Tipusultan",
+            "email": "support@greenviewsoft.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+             "Tipusultan\\Bkash\\": "src/"
+        }
+    },
+    "require": {
+        "php": ">=8.1.0",
+         "illuminate/support": "^9.0 || ^10.0 || ^11.0"
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Tipusultan\\Bkash\\BkashServiceProvider"
+            ]
+        }
+    }
+}
