@@ -32,7 +32,7 @@ class BkashServiceProvider extends ServiceProvider
 
             // Publish Views
             $this->publishes([
-                __DIR__ . '/resources/views' => resource_path('views/bkash')
+                __DIR__ . '/resources/views' => resource_path('views/')
             ], 'bkash-views');
 
             // Publish Service
