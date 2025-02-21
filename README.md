@@ -100,6 +100,19 @@ Route::get('/bkash/refund', [BkashController::class, 'getRefund'])->name('url-ge
 Route::post('/bkash/refund', [BkashController::class, 'refundPayment'])->name('url-post-refund');
 ```
 
+
+
+## Available Routes
+
+| Method | URI | Action | Route Name |
+|--------|-----|--------|------------|
+| GET | /bkash | Show payment form | url-pay |
+| POST | /bkash/create | Create payment | url-create |
+| GET | /bkash/callback | Handle callback | url-callback |
+| GET | /bkash/refund | Show refund form | url-get-refund |
+| POST | /bkash/refund | Process refund | url-post-refund |
+
+
 ### Available Views
 
 | View | Path |
