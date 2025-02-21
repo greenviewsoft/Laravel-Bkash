@@ -9,34 +9,37 @@ class BkashServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        // First register the publishable resources
+        // Register publishable resources
         $this->registerPublishables();
-        
-        // Then load views and migrations
+
+        // Load views and migrations
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'bkash');
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
-        
-        // Finally, setup routes
+
+        // Setup routes
         $this->setupRoutes();
     }
 
     protected function registerPublishables()
     {
         if ($this->app->runningInConsole()) {
+            // Publish config
             $this->publishes([
                 __DIR__ . '/../config/bkash.php' => config_path('bkash.php')
             ], 'bkash-config');
-    
+
+            // Publish Controller
             $this->publishes([
                 __DIR__ . '/../src/Controllers/BkashController.php' => app_path('Http/Controllers/BkashController.php')
             ], 'bkash-controller');
-    
+
+            // Publish Views
             $this->publishes([
                 __DIR__ . '/../resources/views' => resource_path('views/bkash')
             ], 'bkash-views');
         }
     }
-    
+
     public function register()
     {
         $configPath = __DIR__ . '/../config/bkash.php';
@@ -67,7 +70,7 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 ROUTES;
 
-        // ✅ Avoid duplicate route entries
+        // Avoid duplicate route entries
         if (!str_contains(File::get($routesPath), 'bKash Payment Routes')) {
             File::append($routesPath, PHP_EOL . $bkashRoutes);
         }

@@ -1,6 +1,7 @@
 <?php
 
-namespace Tipusultan\Bkash\Controllers;
+namespace App\Http\Controllers;
+
 
 use Illuminate\Http\Request;
 use Tipusultan\Bkash\Services\BkashService;
