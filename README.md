@@ -54,7 +54,7 @@ BKASH_APP_SECRET='your_app_secret'
 4. Add Routes
 Add these routes to your routes/web.php file:
 
-Route::middleware(['web', 'auth'])->group(function () {
+```Route::middleware(['web', 'auth'])->group(function () {
     Route::prefix('bkash')->group(function () {
         Route::get('/', [\App\Http\Controllers\BkashController::class, 'payment'])->name('url-pay');
         Route::post('/create', [\App\Http\Controllers\BkashController::class, 'createPayment'])->name('url-create');
@@ -63,7 +63,7 @@ Route::middleware(['web', 'auth'])->group(function () {
         Route::post('/refund', [\App\Http\Controllers\BkashController::class, 'refundPayment'])->name('url-post-refund');
     });
 });
-
+```
 ## Package Structure
 
 ```
