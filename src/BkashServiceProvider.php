@@ -9,86 +9,41 @@ class BkashServiceProvider extends ServiceProvider
 {
     public function boot()
     {
-        $this->publishFiles();
-        $this->setupRoutes();
+        // First register the publishable resources
+        $this->registerPublishables();
         
-        // Load views
+        // Then load views and migrations
         $this->loadViewsFrom(__DIR__ . '/../resources/views', 'bkash');
-        
-        // Load migrations
         $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        
+        // Finally, setup routes
+        $this->setupRoutes();
     }
 
-    protected function publishFiles()
+    protected function registerPublishables()
     {
-        // Publish config
-        $this->publishes([
-            __DIR__ . '/../config/bkash.php' => config_path('bkash.php'),
-        ], 'bkash-config');
+        if ($this->app->runningInConsole()) {
+            // Config
+            $this->publishes([
+                __DIR__ . '/../config/bkash.php' => config_path('bkash.php')
+            ], 'bkash-config');
 
-        // Publish Controller
-        $this->publishes([
-            __DIR__ . '/Controllers/BkashController.php' => app_path('Http/Controllers/BkashController.php'),
-        ], 'bkash-controller');
+            // Views
+            $this->publishes([
+                __DIR__ . '/../resources/views' => resource_path('views/bkash')
+            ], 'bkash-views');
 
-        // Publish Service
-        $this->publishes([
-            __DIR__ . '/Services/BkashService.php' => app_path('Services/BkashService.php'),
-        ], 'bkash-service');
-
-        // Publish views
-        $this->publishes([
-            __DIR__ . '/../resources/views' => resource_path('views/bkash'),
-        ], 'bkash-views');
-
-        // Publish migrations
-        $this->publishes([
-            __DIR__ . '/../database/migrations' => database_path('migrations'),
-        ], 'bkash-migrations');
-
-        // Ensure files exist
-        $this->ensureFilesExist();
+            // Controller
+            $this->publishes([
+                __DIR__ . '/Controllers/BkashController.php' => app_path('Http/Controllers/BkashController.php')
+            ], 'bkash-controller');
+        }
     }
 
-    protected function ensureFilesExist()
+    public function register()
     {
-        // Ensure config exists
-        if (!file_exists(config_path('bkash.php'))) {
-            $this->copyFile(
-                __DIR__ . '/../config/bkash.php', 
-                config_path('bkash.php')
-            );
-        }
-
-        // Ensure controller exists
-        if (!file_exists(app_path('Http/Controllers/BkashController.php'))) {
-            $this->copyFile(
-                __DIR__ . '/Controllers/BkashController.php',
-                app_path('Http/Controllers/BkashController.php')
-            );
-        }
-
-        // Ensure service exists
-        if (!file_exists(app_path('Services/BkashService.php'))) {
-            $this->copyFile(
-                __DIR__ . '/Services/BkashService.php',
-                app_path('Services/BkashService.php')
-            );
-        }
-
-        // Ensure views directory exists
-        $viewsPath = resource_path('views/bkash');
-        if (!File::exists($viewsPath)) {
-            File::makeDirectory($viewsPath, 0755, true);
-            
-            // Copy all view files
-            foreach (['pay', 'success', 'fail', 'refund'] as $view) {
-                $this->copyFile(
-                    __DIR__ . "/../resources/views/{$view}.blade.php",
-                    "{$viewsPath}/{$view}.blade.php"
-                );
-            }
-        }
+        // Merge config
+        $this->mergeConfigFrom(__DIR__ . '/../config/bkash.php', 'bkash');
     }
 
     protected function setupRoutes()
@@ -113,29 +68,8 @@ Route::middleware(['web', 'auth'])->group(function () {
 
 ROUTES;
 
-        $content = File::get($routesPath);
-        if (!str_contains($content, 'bKash Payment Routes')) {
+        if (!str_contains(File::get($routesPath), 'bKash Payment Routes')) {
             File::append($routesPath, $bkashRoutes);
         }
-    }
-
-    protected function copyFile($source, $destination)
-    {
-        $destinationDir = dirname($destination);
-        if (!File::exists($destinationDir)) {
-            File::makeDirectory($destinationDir, 0755, true);
-        }
-
-        if (File::exists($source)) {
-            File::copy($source, $destination);
-        }
-    }
-
-    public function register()
-    {
-        // Merge config
-        $this->mergeConfigFrom(
-            __DIR__ . '/../config/bkash.php', 'bkash'
-        );
     }
 }
