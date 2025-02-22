@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers;
 
-
 use Illuminate\Http\Request;
-use Tipusultan\Bkash\Services\BkashService;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use Illuminate\Routing\Controller;
+use App\Services\BkashService;
+use App\Models\Payment;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 
 class BkashController extends Controller
 {
@@ -25,57 +25,96 @@ class BkashController extends Controller
 
     public function createPayment(Request $request)
     {
+        $request->validate(['amount' => 'required|numeric|min:1']);
+    
         $website_url = url('/');
-        
+    
         $body_data = [
             'mode' => '0011',
             'payerReference' => auth()->id(),
-            'callbackURL' => $website_url.'/bkash/callback',
+            'callbackURL' => $website_url . '/bkash/callback',
             'amount' => $request->amount,
             'currency' => 'BDT',
             'intent' => 'sale',
-            'merchantInvoiceNumber' => "Inv_".Str::random(6)
+            'merchantInvoiceNumber' => "Inv_" . uniqid()
         ];
-
+    
         $response = $this->bkash->createPayment($body_data);
-        
-        return isset($response['bkashURL']) 
-            ? redirect($response['bkashURL']) 
-            : redirect()->route('url-pay')->with('error', 'Payment creation failed');
+    
+//Log::info('bKash Payment Response:', ['response' => $response]);
+    
+        // Ensure response is decoded correctly
+        if (is_string($response)) {
+            $response = json_decode($response, true);
+        }
+    
+        // Check if `bkashURL` exists
+        if (isset($response['bkashURL'])) {
+           // Log::info('Redirecting to bKash:', ['url' => $response['bkashURL']]);
+            return redirect()->away($response['bkashURL']); // Redirect properly
+        }
+    
+        //::error('bKash Create Payment Failed', ['response' => $response]);
+        return back()->withErrors(['error' => 'Payment creation failed.']);
     }
+    
 
     public function callback(Request $request)
     {
-        Log::info('bKash Callback Request', ['payload' => $request->all()]);
-        
-        if ($request->status == 'failure' || $request->status == 'cancel') {
+        //Log::info('bKash Callback Request:', ['payload' => $request->all()]);
+    
+        if ($request->status === 'failure' || $request->status === 'cancel') {
             return view('bkash.fail', ['response' => 'Payment Failed!']);
         }
-
+    
+        // Execute payment to get transaction details
         $response = $this->bkash->executePayment($request->paymentID);
-        
-        return isset($response['trxID']) 
-            ? view('bkash.success', ['response' => $response['trxID']]) 
-            : view('bkash.fail', ['response' => 'Payment Failed!']);
-    }
+    
+        Log::info('bKash Execute Payment Response:', ['response' => $response]);
+    
+        // Ensure response is decoded correctly
+        if (is_string($response)) {
+            $response = json_decode($response, true);
+        }
+    
+        // Check if payment was successful
+        if (isset($response['transactionStatus']) && $response['transactionStatus'] === 'Completed') {
+    
+            $user = Auth::user();
+            if (!$user) {
+                Log::error('User not authenticated during payment callback');
+                return view('bkash.fail', ['response' => 'User authentication failed!']);
+            }
+    
+            // // Store Payment in Database
+            // Payment::create([
+            //     'user_id' => $user->id,
+            //     'amount' => $response['amount'],
+            //     'payment_status' => 'completed',
+            //     'Payment_type' => 'Bkash',
+            //     'transaction_id' => $response['trxID']
+            // ]);
+    
+            // Update User Balance
+            $user->balance += $response['amount'];
+            $user->save();
+    
+            // Log::info('Payment Successful & User Balance Updated', [
+            //     'user_id' => $user->id,
+            //     'trxID' => $response['trxID'],
+            //     'new_balance' => $user->wallet_balance
+            // ]);
+           
 
-    public function getRefund()
-    {
-        return view('bkash.refund');
-    }
+            return $response;
 
-    public function refundPayment(Request $request)
-    {
-        $response = $this->bkash->refundPayment([
-            'paymentID' => $request->paymentID,
-            'trxID' => $request->trxID,
-            'amount' => $request->amount
-        ]);
 
-        return view('bkash.refund', [
-            'response' => isset($response['refundTrxID']) 
-                ? "Refund successful! TrxID: ".$response['refundTrxID'] 
-                : "Refund failed!"
-        ]);
+         // ✅ Redirect to your custom URL after payment success
+         return redirect('http://localhost/tipu/rexgamingbd/')
+         ->with('success', 'Payment Success! Your balance has been updated.');
+ }
+    
+    Log::error('bKash Payment Failed', ['response' => $response]);
+    return view('bkash.fail', ['response' => 'Payment Failed!']);
     }
 }

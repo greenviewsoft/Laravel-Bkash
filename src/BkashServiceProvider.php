@@ -14,7 +14,7 @@ class BkashServiceProvider extends ServiceProvider
 
         // Load views and migrations
         $this->loadViewsFrom(__DIR__ . '/resources/views', 'bkash');
-        $this->loadMigrationsFrom(__DIR__ . '/database/migrations');
+        //$this->loadMigrationsFrom(__DIR__ . '/database/migrations');
     }
 
     protected function registerPublishables()
@@ -36,11 +36,6 @@ class BkashServiceProvider extends ServiceProvider
                 __DIR__ . '/resources/views' => resource_path('views')
             ], 'bkash-views');
 
-
-            // Publish Views old
-            // $this->publishes([
-            //     __DIR__ . '/resources/views' => resource_path('views/bkash')
-            // ], 'bkash-views');
 
             // Publish Service
             $this->publishes([
